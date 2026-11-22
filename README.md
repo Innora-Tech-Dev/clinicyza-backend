@@ -3,8 +3,6 @@
 The Clinicyza API (Next.js route handlers), background worker and realtime server.
 One API serves the website, the portals and the future iOS / Android apps.
 
-## Manual Deploy - 1
-
 ## Getting started
 
 Requires Node 22.15+.
