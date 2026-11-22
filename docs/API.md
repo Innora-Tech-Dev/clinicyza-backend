@@ -1,6 +1,6 @@
 # Clinicyza API — v1
 
-Base URL: `{BACKEND_URL}/api/v1` (local: `http://localhost:5050/api/v1`)
+Base URL: `{BACKEND_URL}/api/v1` (local: `http://localhost:8000/api/v1`)
 
 One API serves the web portals **and** the Android / iOS apps.
 Every endpoint exists for each role — replace `{role}` with `admin`, `doctor` or `patient`.
@@ -40,7 +40,25 @@ Use `error.code` in app logic; `error.message` is safe to show to users. `detail
 | POST | `/{role}/forgot-password` | — | `{ email }` | `null` — same response whether or not the email exists |
 | POST | `/{role}/reset-password` | — | `{ token, password }` | `null` — signs out all devices |
 | GET | `/{role}/dashboard` | ✅ | — | `{ user, stats[], ... }` |
-| GET | `/api/health` | — | — | service + database status |
+| POST | `/{role}/realtime-token` | ✅ | — | `{ token, url, expiresIn }` — WebSocket ticket |
+| GET | `/public/settings` | — | — | marketing figures, contact, emergency line, maintenance flag |
+| GET | `/admin/settings` | ✅ admin | — | `{ settings }` — all groups |
+| PATCH | `/admin/settings` | ✅ admin | partial, e.g. `{ booking: { holdMinutes: 12 } }` | `{ settings }` |
+| GET | `/admin/logs/api` | ✅ admin | `?status=&method=&page=&pageSize=` | paginated request log |
+| GET | `/admin/logs/errors` | ✅ admin | `?source=api\|worker\|realtime&page=` | paginated error log |
+| GET | `/api/health` | — | — | service, database and worker status |
+
+Every response carries an `X-Request-Id` header — quote it when reporting a problem.
+
+## Realtime (WebSocket)
+
+Socket.IO server (local: `http://localhost:8001`). Client libraries exist for web, iOS and Android.
+
+1. `POST /api/v1/{role}/realtime-token` → `{ token, url }` (valid 60 s; `503 REALTIME_UNAVAILABLE` when not running).
+2. Connect: `io(url, { auth: { token } })`. Fetch a new ticket on every reconnect.
+3. Server events: `ready` `{ userId, role }`, `session:revoked` (then disconnect).
+   Client events: `ping` with ack → `{ pong: true }`.
+4. Signing out, a password reset or a disabled account disconnects the socket within 30 s.
 
 Password rules: 8–128 characters, at least one letter and one number.
 
@@ -89,5 +107,5 @@ Mobile apps can open the same URL as a universal link / app link and call `/{rol
 
 ## Test accounts
 
-`npm run seed` creates (password `Clinicyza123`):
-`admin@clinicyza.test` · `doctor@clinicyza.test` · `patient@clinicyza.test`
+`npm run seed` creates (password `Clinicyza123`, never overwrites existing accounts):
+`admin@clinicyza.test` · `doctor@clinicyza.test` (Dr. Marco Bellini) · `patient@clinicyza.test` (Laura Conti)

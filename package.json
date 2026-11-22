@@ -3,22 +3,32 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5050",
+    "dev": "node scripts/dev.mjs",
+    "dev:all": "node scripts/dev.mjs --all",
+    "dev:api": "next dev -p 8000",
     "build": "next build",
-    "start": "next start -p 5050",
+    "start": "next start -p 8000",
+    "worker": "node --import ./scripts/register-alias.mjs scripts/worker.mjs",
+    "realtime": "node --import ./scripts/register-alias.mjs scripts/realtime.mjs",
     "lint": "eslint",
-    "seed": "node scripts/seed-users.mjs"
+    "test": "node --import ./scripts/register-alias.mjs --test \"tests/**/*.test.js\"",
+    "seed": "node --import ./scripts/register-alias.mjs scripts/seed.mjs"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "jose": "^6.2.18",
     "mongoose": "^9.12.3",
     "next": "16.4.6",
+    "nodemailer": "^10.6.1",
+    "socket.io": "^4.8.4",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "eslint": "^9",
     "eslint-config-next": "16.4.6"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=22.15"
+  }
 }
